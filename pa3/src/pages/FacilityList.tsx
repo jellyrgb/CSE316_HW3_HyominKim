@@ -2,18 +2,34 @@
 // hyomin.kim@stonybrook.edu
 
 // This is the component for the facility list page.
-// It maps the facilities data to FacilityItem components.
-import { facilities } from "../data/FacilityData";
+// It fetches facilities data from the server and maps it to FacilityItem components.
+import { useEffect, useState } from "react";
+import axios from "axios";
 import FacilityItem from "../components/FacilityItem";
+import { Facility } from "../data/types.ts";
 
-function Facility() {
+function FacilityList() {
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/facilities");
+        setFacilities(response.data);
+      } catch (error) {
+        console.error("Error fetching facilities:", error);
+      }
+    };
+    fetchFacilities();
+  }, []);
+
   return (
     <div className="facility-list">
       {facilities.map((facility) => (
-        <FacilityItem key={facility.name} facility={facility} />
+        <FacilityItem key={facility.id} facility={facility} />
       ))}
     </div>
   );
 }
 
-export default Facility;
+export default FacilityList;
