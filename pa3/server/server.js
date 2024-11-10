@@ -7,10 +7,11 @@ app.use(cors());
 app.use(express.json());
 
 const db = await mysql.createConnection({
-  host: 'localhost',
+  host: '127.0.0.1',
   user: 'root',
   password: 'leesin',
   database: 'facres',
+  socketPath: '/tmp/mysql.sock'
 });
 
 app.get('/api/facilities', async (req, res) => {

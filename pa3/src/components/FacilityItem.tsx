@@ -3,7 +3,7 @@
 
 // This component is a child component of FacilityList.tsx.
 // It renders the information of a single facility.
-import { Facility } from "../data/types.ts";
+import { Facility } from "../data/Types.ts";
 
 interface FacilityItemProps {
   facility: Facility;

@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import FacilityItem from "../components/FacilityItem";
-import { Facility } from "../data/types.ts";
+import { Facility } from "../data/Types.ts";
 
 function FacilityList() {
   const [facilities, setFacilities] = useState<Facility[]>([]);
