@@ -4,26 +4,34 @@
 // This is the component for the reservation list page.
 // It displays the reservations made by the user.
 import { useState, useEffect } from "react";
+import axios from "axios";
 import ReservedItem from "../components/ReservedItem";
 
 function Reservations() {
   const [reservations, setReservations] = useState<any[]>([]);
 
-  // Load reservations from local storage
+  // Load reservations from the backend
   useEffect(() => {
-    const savedReservations = JSON.parse(
-      localStorage.getItem("reservations") || "[]"
-    );
-    setReservations(savedReservations);
+    const fetchReservations = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/reservations");
+        setReservations(response.data);
+      } catch (error) {
+        console.error("Error fetching reservations:", error);
+      }
+    };
+
+    fetchReservations();
   }, []);
 
   // Delete a reservation
-  const handleDelete = (facilityName: string) => {
-    const updatedReservations = reservations.filter(
-      (reservation) => reservation.facility.name !== facilityName
-    );
-    setReservations(updatedReservations);
-    localStorage.setItem("reservations", JSON.stringify(updatedReservations));
+  const handleDelete = async (reservationId: number) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/reservations/${reservationId}`);
+      setReservations(reservations.filter((reservation) => reservation.id !== reservationId));
+    } catch (error) {
+      console.error("Error deleting reservation:", error);
+    }
   };
 
   return (
@@ -32,11 +40,11 @@ function Reservations() {
         <h1>No reservations found.</h1>
       ) : (
         <div className="reservation-list">
-          {reservations.map((reservation, index) => (
+          {reservations.map((reservation) => (
             <ReservedItem
-              key={index}
+              key={reservation.id}
               reservation={reservation}
-              onDelete={() => handleDelete(reservation.facility.name)}
+              onDelete={() => handleDelete(reservation.id)}
             />
           ))}
         </div>

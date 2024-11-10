@@ -4,7 +4,8 @@
 // This component is a child component of FacilityReservation.tsx.
 // It renders the form for making a reservation.
 import React, { useState, useEffect } from "react";
-import { facilities, Facility } from "../data/FacilityData";
+import axios from "axios";
+import { Facility } from "../data/Types.ts";
 import ReservationItem from "../components/ReservationItem";
 
 interface ReservationFormProps {
@@ -13,6 +14,7 @@ interface ReservationFormProps {
 
 function ReservationForm({ onSelectFacility }: ReservationFormProps) {
   const [facility, setFacility] = useState<Facility | null>(null);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
 
   // Set default values for the form fields
   const today = new Date();
@@ -21,26 +23,43 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
   const [affiliation, setAffiliation] = useState("yes");
   const [purpose, setPurpose] = useState("");
 
-  // Set the default facility to "Gym"
+  // Fetch facilities from the backend
   useEffect(() => {
-    const initialFacility = facilities.find((f) => f.name === "Gym") || null;
-    setFacility(initialFacility);
+    const fetchFacilities = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/facilities");
+        const data = response.data;
+        if (Array.isArray(data)) {
+          setFacilities(data);
+          const initialFacility = data.find((f: Facility) => f.name === "Gym") || null;
+          setFacility(initialFacility);
+        } else {
+          console.error("Unexpected response data format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching facilities:", error);
+      }
+    };
+
+    fetchFacilities(); // Call the fetchFacilities function
   }, []);
 
+  const getDateOnly = (dateString: string) => {
+    return new Date(dateString).toISOString().split('T')[0];
+  };
+
   // Handle the form submission
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!facility) return;
 
-    const facilityCapacity = facility.participants;
+    const maxCapacity = facility.max_capacity;
+    const minCapacity = facility.min_capacity;
     const selectedDate = new Date(date);
 
     // If the number of people is not within the capacity range, show an alert
-    if (
-      people > facilityCapacity.split(" - ").map(Number)[1] ||
-      people < facilityCapacity.split(" - ").map(Number)[0]
-    ) {
+    if (people > maxCapacity || people < minCapacity) {
       alert("Cannot reserve. (Capacity)");
       return;
     }
@@ -56,7 +75,7 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
     }
 
     // If the facility is only available for SUNY Korea students, show an alert
-    if (facility.available === "Only for SUNY Korea" && affiliation === "no") {
+    if (facility.only_for_suny == true && affiliation === "no") {
       alert("Cannot reserve. (Affiliation)");
       return;
     }
@@ -84,50 +103,55 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
     const days = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
     // If the facility is not available on the selected day, show an alert
-    if (!facility.days.includes(days[Math.floor(dayOfWeek)])) {
+    if (!facility.available_days.includes(days[Math.floor(dayOfWeek)])) {
       alert("Cannot reserve. (Day of the week)");
       return;
     }
 
     // Create a reservation object
     const reservation = {
-      facility,
-      date,
-      people,
-      affiliation,
+      reservation_date: date,
+      user_number: people,
+      is_suny_korea: affiliation === "yes",
       purpose,
+      facility_id: facility.id,
+      user_name: "John Doe",
     };
 
-    // Get the existing reservations from the local storage
-    const reservations = JSON.parse(
-      localStorage.getItem("reservations") || "[]"
+    // Check for existing reservation on the same day
+    const existingReservation = await axios.get("http://localhost:5000/api/reservations");
+    const existingReservationData = existingReservation.data;
+    const existingReservationOnSameDay = existingReservationData.find(
+      (r: any) => getDateOnly(r.reservation_date) === getDateOnly(date)
     );
 
-    // Check if there is a reservation for the same facility or date
-    const sameFacility = reservations.some(
-      (reservation: any) => reservation.facility.name === facility.name
-    );
-    const sameDate = reservations.some(
-      (reservation: any) => reservation.date === date
-    );
-
-    // If there is a reservation for the same facility, show an alert
-    if (sameFacility) {
-      alert("Cannot reserve. (Reservation for same facility)");
+    if (existingReservationOnSameDay) {
+      alert("Cannot reserve. (Existing reservation on the same day)");
       return;
     }
 
-    // If there is a reservation for the same date, show an alert
-    if (sameDate) {
-      alert("Cannot reserve. (Reservation for same date)");
+    // Check for existing reservation for the same facility
+    const existingReservationForSameFacility = existingReservationData.find(
+      (r: any) => r.facility_id === facility.id
+    );
+
+    if (existingReservationForSameFacility) {
+      alert("Cannot reserve. (Existing reservation for the same facility)");
       return;
     }
 
-    // Save the reservation to the local storage
-    reservations.push(reservation);
-    localStorage.setItem("reservations", JSON.stringify(reservations));
+    try {
+      const response = await axios.post("http://localhost:5000/api/reservations", reservation);
+      if (response.status === 201) {
+        alert("Reserved successfully.");
+      } else {
+        alert("Failed to reserve.");
+      }
+    } catch (error) {
+      console.error("Error saving reservation:", error);
+      alert("Error saving reservation.");
+    }
 
-    alert("Reserved successfully.");
   };
 
   // Handle the facility change
@@ -151,9 +175,7 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
             onChange={handleFacilityChange}
           >
             {facilities.map((f) => (
-              <option key={f.name} value={f.name}>
-                {f.name}
-              </option>
+              <option key={f.id}>{f.name}</option>
             ))}
           </select>
         </div>

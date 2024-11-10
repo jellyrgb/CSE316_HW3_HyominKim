@@ -9,4 +9,13 @@ export interface Facility {
     only_for_suny: boolean;
     image_source: string;
 }
-  
+
+export interface Reservation {
+    id: number;
+    reservation_date: string;
+    user_number: number;
+    is_suny_korea: boolean;
+    purpose: string;
+    facility_id: number;
+    user_name: string;
+}

@@ -3,17 +3,8 @@
 
 // This component is a child component of ReservationList.tsx.
 // It renders the reservation information.
-import { Facility } from "../data/FacilityData.ts";
-
 interface ReservationItemProps {
-  reservation: {
-    facility: Facility;
-    date: string;
-    people: number;
-    affiliation: string;
-    purpose: string;
-  };
-
+  reservation: any;
   onDelete: () => void;
 }
 
@@ -21,10 +12,10 @@ function ReservedItem({ reservation, onDelete }: ReservationItemProps) {
   return (
     <div className="reserved-item">
       {/* Facility image */}
-      <img src={reservation.facility.image} alt={reservation.facility.name} />
+      <img src={reservation.facility_image_source} alt={reservation.facility_name} />
       <div className="facility-info">
         {/* Facility name */}
-        <h2 id="reserved-facility-name">{reservation.facility.name}</h2>
+        <h2 id="reserved-facility-name">{reservation.facility_name}</h2>
 
         {/* Reservation purpose */}
         <div>
@@ -58,7 +49,7 @@ function ReservedItem({ reservation, onDelete }: ReservationItemProps) {
             <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0" />
             <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z" />
           </svg>
-          <span>{reservation.date}</span>
+          <span>{reservation.reservation_date.split('T')[0]}</span>
         </div>
 
         {/* Facility location */}
@@ -80,7 +71,7 @@ function ReservedItem({ reservation, onDelete }: ReservationItemProps) {
               d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"
             />
           </svg>
-          <span>{reservation.facility.location}</span>
+          <span>{reservation.facility_location}</span>
         </div>
 
         {/* Number of people */}
@@ -95,7 +86,7 @@ function ReservedItem({ reservation, onDelete }: ReservationItemProps) {
           >
             <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
           </svg>
-          <span>John Doe + {reservation.people - 1}</span>
+          <span>{reservation.user_name} + {reservation.user_number - 1}</span>
         </div>
 
         {/* Affiliation */}
@@ -115,9 +106,7 @@ function ReservedItem({ reservation, onDelete }: ReservationItemProps) {
             <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
           </svg>
           <span>
-            {reservation.affiliation === "yes"
-              ? "Only for SUNY Korea"
-              : "Non-SUNY Korea"}
+            {reservation.facility_only_for_suny ? "Only for SUNY Korea" : "Available to all"}
           </span>
         </div>
 
