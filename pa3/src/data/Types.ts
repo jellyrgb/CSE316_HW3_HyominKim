@@ -18,4 +18,9 @@ export interface Reservation {
     purpose: string;
     facility_id: number;
     user_name: string;
+
+    facility_image_source: string;
+    facility_name: string;
+    facility_location: string;
+    facility_only_for_suny: boolean;
 }
