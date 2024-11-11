@@ -5,16 +5,19 @@
 // It renders the form for making a reservation.
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Facility } from "../data/Types.ts";
+import { Facility, Reservation } from "../data/Types.ts";
 import ReservationItem from "../components/ReservationItem";
+import { useFacilities } from "../context/FacilityContext.tsx";
+import { useReservations } from "../context/ReservationContext.tsx";
 
 interface ReservationFormProps {
   onSelectFacility: (facility: Facility | null) => void;
 }
 
 function ReservationForm({ onSelectFacility }: ReservationFormProps) {
+  const { facilities } = useFacilities();
+  const { addReservation } = useReservations();
   const [facility, setFacility] = useState<Facility | null>(null);
-  const [facilities, setFacilities] = useState<Facility[]>([]);
 
   // Set default values for the form fields
   const today = new Date();
@@ -22,27 +25,16 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
   const [people, setPeople] = useState(1);
   const [affiliation, setAffiliation] = useState("yes");
   const [purpose, setPurpose] = useState("");
+  // const [userName, setUserName] = useState("");
 
-  // Fetch facilities from the backend
+  // Set default facility to "Gym"
   useEffect(() => {
-    const fetchFacilities = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/facilities");
-        const data = response.data;
-        if (Array.isArray(data)) {
-          setFacilities(data);
-          const initialFacility = data.find((f: Facility) => f.name === "Gym") || null;
-          setFacility(initialFacility);
-        } else {
-          console.error("Unexpected response data format:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching facilities:", error);
-      }
-    };
-
-    fetchFacilities(); // Call the fetchFacilities function
-  }, []);
+    if (facilities.length > 0) {
+      const defaultFacility = facilities.find((f) => f.name === "Gym") || null;
+      setFacility(defaultFacility);
+      onSelectFacility(defaultFacility);
+    }
+  }, [facilities, onSelectFacility]);
 
   const getDateOnly = (dateString: string) => {
     return new Date(dateString).toISOString().split('T')[0];
@@ -109,7 +101,8 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
     }
 
     // Create a reservation object
-    const reservation = {
+    const reservation: Reservation = {
+      id: 0, // Temporary id, will be replaced by the server
       reservation_date: date,
       user_number: people,
       is_suny_korea: affiliation === "yes",
@@ -141,12 +134,8 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/reservations", reservation);
-      if (response.status === 201) {
-        alert("Reserved successfully.");
-      } else {
-        alert("Failed to reserve.");
-      }
+      await addReservation(reservation);
+      alert("Reserved successfully.");
     } catch (error) {
       console.error("Error saving reservation:", error);
       alert("Error saving reservation.");
@@ -155,11 +144,8 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
   };
 
   // Handle the facility change
-  const handleFacilityChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const selectedFacility =
-      facilities.find((f) => f.name === event.target.value) || null;
+  const handleFacilityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedFacility = facilities.find((f) => f.name === event.target.value) || null;
     setFacility(selectedFacility);
     onSelectFacility(selectedFacility);
   };

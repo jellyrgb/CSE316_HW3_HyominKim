@@ -3,25 +3,14 @@
 
 // This is the component for the facility list page.
 // It fetches facilities data from the server and maps it to FacilityItem components.
-import { useEffect, useState } from "react";
-import axios from "axios";
 import FacilityItem from "../components/FacilityItem";
-import { Facility } from "../data/Types.ts";
+import { useFacilities } from "../context/FacilityContext.tsx";
 
 function FacilityList() {
-  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const { facilities, loading, error } = useFacilities();
 
-  useEffect(() => {
-    const fetchFacilities = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/facilities");
-        setFacilities(response.data);
-      } catch (error) {
-        console.error("Error fetching facilities:", error);
-      }
-    };
-    fetchFacilities();
-  }, []);
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="facility-list">

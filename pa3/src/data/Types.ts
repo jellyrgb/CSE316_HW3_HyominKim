@@ -18,6 +18,15 @@ export interface Reservation {
     purpose: string;
     facility_id: number;
     user_name: string;
+}
+
+export interface ReservedItemInterface {
+    reservation_date: string;
+    user_number: number;
+    is_suny_korea: boolean;
+    purpose: string;
+    facility_id: number;
+    user_name: string;
 
     facility_image_source: string;
     facility_name: string;

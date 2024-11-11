@@ -3,10 +3,8 @@
 
 // This component is a child component of ReservationList.tsx.
 // It renders the reservation information.
-import { Reservation } from "../data/Types.ts";
-
 interface ReservationItemProps {
-  reservation: Reservation;
+  reservation: any;
   onDelete: () => void;
 }
 
