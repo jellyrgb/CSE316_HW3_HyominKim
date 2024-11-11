@@ -36,6 +36,7 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
     }
   }, [facilities, onSelectFacility]);
 
+  // Function to get the date only
   const getDateOnly = (dateString: string) => {
     return new Date(dateString).toISOString().split('T')[0];
   };
@@ -133,6 +134,7 @@ function ReservationForm({ onSelectFacility }: ReservationFormProps) {
       return;
     }
 
+    // Save the reservation
     try {
       await addReservation(reservation);
       alert("Reserved successfully.");

@@ -1,3 +1,8 @@
+// Hyomin Kim
+// hyomin.kim@stonybrook.edu
+
+// This file is a context provider for facilities.
+// It fetches the facilities from the server and provides them to the components that need them.
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
 import axios from 'axios';
 import { Facility } from '../data/Types';

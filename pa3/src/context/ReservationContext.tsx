@@ -1,3 +1,8 @@
+// Hyomin Kim
+// hyomin.kim@stonybrook.edu
+
+// This file is a context provider for reservations.
+// It fetches the reservations from the server and provides them to the components that need them.
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import { Reservation } from '../data/Types.ts';

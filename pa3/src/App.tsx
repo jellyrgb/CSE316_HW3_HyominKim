@@ -2,10 +2,10 @@
 // hyomin.kim@stonybrook.edu
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import "./App.css";
 import { FacilityProvider } from "./context/FacilityContext.tsx";
 import { ReservationProvider } from "./context/ReservationContext.tsx";
 
+import "./App.css";
 import Navbar from "./components/Navbar.tsx";
 import Home from "./pages/Home.tsx";
 import FacilityList from "./pages/FacilityList.tsx";

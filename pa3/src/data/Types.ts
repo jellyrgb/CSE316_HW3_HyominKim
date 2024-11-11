@@ -1,3 +1,7 @@
+// Hyomin Kim
+// hyomin.kim@stonybrook.edu
+
+// This file contains the types used in the application.
 export interface Facility {
     id: number;
     name: string;
